@@ -2,12 +2,12 @@
 
 # -*- coding: utf-8 -*-
 
-from bacalhau import TopicHierarchyGenerator
-from teimanager import TEIManager
+from bacalhau.corpus_manager import CorpusManager
+from bacalhau.data.tei_manager import TEIManager
 
 CORPUS_PATH = 'corpus'
 
 if __name__ == "__main__":
-    thg = TopicHierarchyGenerator(CORPUS_PATH, TEIManager)
-    thg.extract()
-    print(thg._corpus.words())
+    cm = CorpusManager(CORPUS_PATH, TEIManager)
+    cm.extract()
+    print(cm._corpus.words())
