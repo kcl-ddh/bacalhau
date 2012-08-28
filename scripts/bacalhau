@@ -2,12 +2,13 @@
 
 # -*- coding: utf-8 -*-
 
-from bacalhau.corpus_manager import CorpusManager
+from bacalhau.tei_corpus_manager import TEICorpusManager
 from bacalhau.data.tei_manager import TEIManager
 
 CORPUS_PATH = 'corpus'
+XPATH = '//tei:body/tei:head'
 
 if __name__ == "__main__":
-    cm = CorpusManager(CORPUS_PATH, TEIManager)
+    cm = TEICorpusManager(CORPUS_PATH, TEIManager, XPATH)
     cm.extract()
     print(cm._corpus.words())

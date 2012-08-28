@@ -9,17 +9,27 @@ class ABCManager:
     should extend this class and override the abstract methods."""
     __metaclass__ = abc.ABCMeta
 
-    TEI_NAMESPACE = 'http://www.tei-c.org/ns/1.0'
-    XML_NAMESPACE = 'http://www.w3.org/XML/1998/namespace'
-    NS_MAP = {'tei': TEI_NAMESPACE, 'xml': XML_NAMESPACE}
-
     @classmethod
-    def __init__(self, filepath):
+    def __init__(self, filepath, workpath, tokenizer, stopwords):
         """Creates a new TEIManager for the given file path."""
         self._path = os.path.abspath(filepath)
+        self._key = os.path.splitext(os.path.basename(self._path))[0]
+        self._base_filepath = os.path.splitext(self._path)[0]
+        self._work_path = os.path.abspath(workpath)
+        self._tokenizer = tokenizer
+        self._stopwords = stopwords
+        self._texts = {}
+
+    def get_texts(self):
+        """Returns the dictionary of all the `Text` objects of the manager."""
+        return self._texts
+
+    def get_text(self, key):
+        """Returns the text for the given key."""
+        return self._texts[key]
 
     @abc.abstractmethod
-    def get_text(self):
-        """Returns a list of strings representing the desired content extracted
-        from the TEI document."""
+    def extract_texts(self):
+        """Extracts text sections from the current file and it creates a
+        `Text` object for each one and adds it to the texts dictionary."""
         return
