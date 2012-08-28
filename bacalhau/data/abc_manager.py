@@ -4,9 +4,9 @@ import abc
 import os
 
 
-class Manager:
+class ABCManager:
     """Abstract class to read from/write to files. Different implementations
-    should extend this class and override the methods XYZ."""
+    should extend this class and override the abstract methods."""
     __metaclass__ = abc.ABCMeta
 
     TEI_NAMESPACE = 'http://www.tei-c.org/ns/1.0'
