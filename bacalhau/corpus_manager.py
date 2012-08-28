@@ -5,7 +5,7 @@ import os
 import re
 
 
-class TopicHierarchyGenerator(object):
+class CorpusManager(object):
 
     WORK_DIR = 'work'
 
@@ -13,7 +13,7 @@ class TopicHierarchyGenerator(object):
             tokenizer=nltk.tokenize.regexp.WordPunctTokenizer(),
             stopwords=nltk.corpus.stopwords.words('english')):
         """Creates a new CorpusManager for the given path, using the given
-        Manager to process the files."""
+        document Manager to process the files."""
         self._path = os.path.abspath(corpuspath)
         self._manager = manager
         self._tokenizer = tokenizer
