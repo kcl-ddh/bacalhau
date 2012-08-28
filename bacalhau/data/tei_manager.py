@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from lxml import etree
-from manager import Manager
+from abc_manager import ABCManager
 import re
 
 
-class TEIManager(Manager):
+class TEIManager(ABCManager):
     """Implementation of the abstract Manager class to work with TEI files."""
 
     XPATH = '//tei:body/tei:head//text()[not(ancestor::tei:note)]'
