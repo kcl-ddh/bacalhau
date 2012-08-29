@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from operator import itemgetter
 import nltk
 import os
+import pickle
 
 
 class CorpusManager(object):
@@ -37,6 +39,43 @@ class CorpusManager(object):
 
         self._corpus = nltk.corpus.PlaintextCorpusReader(self._work_path, '.*')
         self._textcollection = nltk.text.TextCollection(self._corpus)
+
+        for f in self._corpus.fileids():
+            tf_idf_dict = {}
+
+            for w in self._corpus.words(fileids=f):
+                tf_idf_dict[w] = self._textcollection.tf_idf(w,
+                        self._textcollection)
+
+            tf_idf_dict = sorted(tf_idf_dict.iteritems(), key=itemgetter(1),
+                    reverse=True)
+
+            tf_idf_file = open(os.path.join(self._work_path, f + '-tf_id.pkl'),
+                'wb')
+            pickle.dump(tf_idf_dict, tf_idf_file)
+            tf_idf_file.close()
+
+            hypernyms_dict = {}
+
+            for idx, item in enumerate(tf_idf_dict):
+                word = item[0]
+                hypernyms_dict[word] = []
+
+                if idx >= 10:
+                    break
+
+                synsets = nltk.corpus.wordnet.synsets(word)
+
+                while len(synsets) > 0:
+                    syn = synsets[0]
+                    name = syn.name
+                    hypernyms_dict[word].append(name[:name.find('.')])
+                    synsets = syn.hypernyms()
+
+            hypernyms_file = open(os.path.join(self._work_path,
+                f + '-syn.pkl'), 'wb')
+            pickle.dump(hypernyms_dict, hypernyms_file)
+            hypernyms_file.close()
 
     def prepare(self):
         """Prepares the corpus for the topic tree generation."""

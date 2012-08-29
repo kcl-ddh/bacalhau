@@ -29,9 +29,6 @@ class TEIManager(ABCManager):
 
         for el in el_list:
             xml_id = el.get(self.XML + 'id')
-            if not xml_id:
-                xml_id = el.__hash__()
-
             text_key = '%s-%s' % (self._key, xml_id)
             text_filepath = os.path.join(self._work_path, text_key)
             content = etree.tostring(el, encoding='utf-8', method='text')

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from nltk.corpus import wordnet
 import nltk
 import re
 
@@ -16,9 +17,10 @@ class Text(object):
 
         tokens = self.tokenize(content)
         tokens = self.prune_tokens(tokens)
+        unique_tokens = sorted(list(set(tokens)))
 
         text_file = open(filepath, 'w')
-        text_file.write('\n'.join(tokens))
+        text_file.write('\n'.join(unique_tokens))
         text_file.close()
 
     def tokenize(self, text):
@@ -37,7 +39,7 @@ class Text(object):
             if re.search(r'[^A-Za-z]', token):
                 continue
 
-            if not nltk.corpus.wordnet.synsets(token):
+            if not wordnet.synsets(token, pos=wordnet.NOUN):
                 continue
 
             pruned_tokens.append(token)
