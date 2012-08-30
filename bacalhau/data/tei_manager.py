@@ -23,16 +23,18 @@ class TEIManager(ABCManager):
         self._ns_map = ns_map
 
     def extract_texts(self):
-        """Extracts text sections from the current file."""
+        """Returns a list of `Text` objects representing text sections from the
+        current file."""
         tree = etree.parse(self._path)
         el_list = tree.xpath(self._xpath, namespaces=self._ns_map)
+        texts = []
 
         for el in el_list:
             xml_id = el.get(self.XML + 'id')
             text_key = '%s-%s' % (self._key, xml_id)
             text_filepath = os.path.join(self._work_path, text_key)
             content = etree.tostring(el, encoding='utf-8', method='text')
-            self._texts[xml_id] = Text(text_key, text_filepath, content,
-                    self._tokenizer, self._stopwords)
+            texts.append(Text(text_key, text_filepath, content,
+                    self._tokenizer, self._stopwords))
 
-        return self._texts
+        return texts

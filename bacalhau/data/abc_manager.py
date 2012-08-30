@@ -18,18 +18,9 @@ class ABCManager:
         self._work_path = os.path.abspath(workpath)
         self._tokenizer = tokenizer
         self._stopwords = stopwords
-        self._texts = {}
-
-    def get_texts(self):
-        """Returns the dictionary of all the `Text` objects of the manager."""
-        return self._texts
-
-    def get_text(self, key):
-        """Returns the text for the given key."""
-        return self._texts[key]
 
     @abc.abstractmethod
     def extract_texts(self):
-        """Extracts text sections from the current file and it creates a
-        `Text` object for each one and adds it to the texts dictionary."""
+        """Returns a list of `Text` objects representing text sections from the
+        current file."""
         return

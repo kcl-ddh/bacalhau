@@ -3,3 +3,5 @@ pyyaml
 nltk
 matplotlib
 networkx
+lxml
+pygraphviz

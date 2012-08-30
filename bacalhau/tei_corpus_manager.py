@@ -29,4 +29,7 @@ class TEICorpusManager(CorpusManager):
                 manager = self._manager(os.path.join(path, filename),
                         self._work_path, self._tokenizer, self._stopwords,
                         self._xpath)
-                manager.extract_texts()
+                texts = manager.extract_texts()
+
+                for text in texts:
+                    self._texts[text._key] = text

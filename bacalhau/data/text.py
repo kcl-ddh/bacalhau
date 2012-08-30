@@ -14,6 +14,8 @@ class Text(object):
         self._content = content
         self._tokenizer = tokenizer
         self._stopwords = stopwords
+        self._tf_idf_dict = {}
+        self._hypernyms_dict = {}
 
         tokens = self.tokenize(content)
         tokens = self.prune_tokens(tokens)
