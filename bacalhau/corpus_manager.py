@@ -47,9 +47,9 @@ class CorpusManager(object):
                 hypernym.reverse()
                 tree.add_path(hypernym)
 
-        compressed_tree = self._compress_and_prune_tree(tree, [])
+        tree = self._compress_and_prune_tree(tree, [])
 
-        return compressed_tree
+        return tree
 
     def extract(self):
         """Extracts target tems from the texts: selects nouns, computes tf.idf,
@@ -80,19 +80,19 @@ class CorpusManager(object):
             hypernyms_dict = {}
 
             for idx, item in enumerate(tf_idf_dict):
-                word = item[0]
-                hypernyms_dict[word] = []
-                hypernyms_dict[word].append('%s_' % word)
-
                 if idx >= 10:
                     break
+
+                word = item[0]
+                hypernyms_dict[word] = []
+                hypernyms_dict[word].append(word)
 
                 synsets = nltk.corpus.wordnet.synsets(word)
 
                 while len(synsets) > 0:
                     syn = synsets[0]
                     name = syn.name
-                    hypernyms_dict[word].append(name[:name.find('.')])
+                    hypernyms_dict[word].append(name)
                     synsets = syn.hypernyms()
 
             text._hypernyms_dict = hypernyms_dict
