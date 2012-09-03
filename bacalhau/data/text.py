@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from nltk.corpus import wordnet
-import nltk
 import re
+
 
 class Text(object):
     """Represents a text unit from a file managed by an `ABCManager`."""
@@ -16,6 +16,7 @@ class Text(object):
         self._stopwords = stopwords
         self._tf_idf_dict = {}
         self._hypernyms_dict = {}
+        self._tree = None
 
         tokens = self.tokenize(content)
         tokens = self.prune_tokens(tokens)

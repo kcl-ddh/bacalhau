@@ -94,25 +94,24 @@ class CorpusManager(object):
         """Generates topic tree: creates hypernym paths for the target terms,
         generates topic tree for the hypernym paths, compresses the topic
         tree."""
-        hypernyms_dict = {}
         tree = TopicTree()
 
         for text in self._texts.values():
-            hypernyms_dict = dict(hypernyms_dict.items() + \
-                    text._hypernyms_dict.items())
-
-        for hypernym in hypernyms_dict.values():
-            if len(hypernym) > 0:
-                tree.add_nodes_from(hypernym)
-                tree.node[hypernym[0]]['is_leaf'] = True
-                tree.node[hypernym[0]]['group'] = 'leaf'
-                tree.node[hypernym[len(hypernym) - 1]]['is_root'] = True
-                tree.node[hypernym[len(hypernym) - 1]]['group'] = 'root'
-                hypernym.reverse()
-                tree.add_path(hypernym)
+            for hypernym in text._hypernyms_dict.values():
+                if len(hypernym) > 0:
+                    tree.add_nodes_from(hypernym)
+                    tree.node[hypernym[0]]['is_leaf'] = True
+                    tree.node[hypernym[0]]['group'] = 'leaf'
+                    tree.node[hypernym[len(hypernym) - 1]]['is_root'] = True
+                    tree.node[hypernym[len(hypernym) - 1]]['group'] = 'root'
+                    hypernym.reverse()
+                    tree.add_path(hypernym)
 
         tree = self._compress_and_prune_tree(tree, nodes_to_prune,
                 min_children)
+
+        for text in self._texts.values():
+            text._tree = tree
 
         return tree
 
