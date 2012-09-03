@@ -7,8 +7,12 @@ from bacalhau.data.tei_manager import TEIManager
 
 CORPUS_PATH = 'corpus'
 XPATH = '//tei:body/tei:head'
+NODES_TO_PRUNE = ['abstraction.n.01', 'abstraction.n.06', 'entity.n.01',
+        'event.n.01', 'living_thing.n.01', 'object.n.01', 'organism.n.01',
+        'psychological_feature.n.01', 'physical_entity.n.01', 'thing.n.12',
+        'whole.n.02']
 
 if __name__ == "__main__":
     cm = TEICorpusManager(CORPUS_PATH, TEIManager, XPATH)
-    cm.extract()
-    print(cm._corpus.words())
+    tree = cm.generate_topic_tree(nodes_to_prune=NODES_TO_PRUNE)
+    tree.render('tree.svg')
