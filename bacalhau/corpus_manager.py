@@ -103,7 +103,9 @@ class CorpusManager(object):
             if len(hypernym) > 0:
                 tree.add_nodes_from(hypernym)
                 tree.node[hypernym[0]]['is_leaf'] = True
+                tree.node[hypernym[0]]['group'] = 'leaf'
                 tree.node[hypernym[len(hypernym) - 1]]['is_root'] = True
+                tree.node[hypernym[len(hypernym) - 1]]['group'] = 'root'
                 hypernym.reverse()
                 tree.add_path(hypernym)
 
