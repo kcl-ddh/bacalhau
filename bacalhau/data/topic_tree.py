@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from networkx.readwrite import json_graph
 import networkx as nx
 
 
@@ -21,5 +22,5 @@ class TopicTree(nx.DiGraph):
     def to_json(self, filepath):
         """Serializes the TopicTree to JSON Graph format."""
         json_file = open(filepath, 'w')
-        json_file.write(nx.readwrite.json_graph.dumps(self))
+        json_file.write(json_graph.dumps(self))
         json_file.close()
