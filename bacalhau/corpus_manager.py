@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from operator import itemgetter
-import networkx
+from data.topic_tree import TopicTree
 import nltk
 import os
 
@@ -24,14 +24,16 @@ class CorpusManager(object):
         self._corpus = None
         self._textcollection = None
         self._texts = {}
+        self._tree = None
 
     def generate_topic_tree(self, n_target_terms=10, nodes_to_prune=[],
             min_children=2):
         """Generates the topic tree for the corpus."""
         self.prepare()
         self.extract(n_target_terms)
+        self._tree = self.generate(nodes_to_prune, min_children)
 
-        return self.generate(nodes_to_prune, min_children)
+        return self._tree
 
     def prepare(self):
         """Prepares the corpus for the topic tree generation."""
@@ -93,7 +95,7 @@ class CorpusManager(object):
         generates topic tree for the hypernym paths, compresses the topic
         tree."""
         hypernyms_dict = {}
-        tree = networkx.DiGraph()
+        tree = TopicTree()
 
         for text in self._texts.values():
             hypernyms_dict = dict(hypernyms_dict.items() + \
