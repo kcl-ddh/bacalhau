@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from networkx import DiGraph
-import pygraphviz
+import networkx as nx
 
 
-class TopicTree(DiGraph):
+class TopicTree(nx.DiGraph):
     """Represents a TopicTree. Extends networkx.DiGraph."""
 
     def __init__(self, data=None, **attr):
@@ -12,12 +11,15 @@ class TopicTree(DiGraph):
 
     def render(self, filepath, format='svg', prog='dot', attributes={}):
         """Renders the topic tree into the file at filepath."""
-        agraph = pygraphviz.AGraph(strict=True, directed=True)
-        agraph.node_attr['shape'] = 'box'
-        agraph.node_attr['style'] = 'filled'
-        agraph.node_attr['fillcolor'] = 'lemonchiffon'
+        agraph = nx.to_agraph(self)
 
-        agraph.add_nodes_from(self.nodes())
-        agraph.add_edges_from(self.edges())
+        for key, value in attributes.iteritems():
+            agraph.node_attr[key] = value
 
         agraph.draw(filepath, format=format, prog=prog)
+
+    def to_json(self, filepath):
+        """Serializes the TopicTree to JSON Graph format."""
+        json_file = open(filepath, 'w')
+        json_file.write(nx.readwrite.json_graph.dumps(self))
+        json_file.close()
