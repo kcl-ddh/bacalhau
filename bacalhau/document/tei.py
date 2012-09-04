@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from bacalhau.document.base import Document
+from bacalhau.text import Text
 from lxml import etree
-from text import Text
 import os
 
 
