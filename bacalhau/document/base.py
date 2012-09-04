@@ -4,7 +4,7 @@ import abc
 import os
 
 
-class ABCManager:
+class Document:
     """Abstract class to read from/write to files. Different implementations
     should extend this class and override the abstract methods."""
     __metaclass__ = abc.ABCMeta

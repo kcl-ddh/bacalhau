@@ -2,8 +2,8 @@
 
 # -*- coding: utf-8 -*-
 
-from bacalhau.tei_corpus_manager import TEICorpusManager
-from bacalhau.data.tei_manager import TEIManager
+from bacalhau.corpus.tei import TEICorpus
+from bacalhau.document.tei import TEIDocument
 
 CORPUS_PATH = 'corpus'
 XPATH = '//tei:body/tei:head'
@@ -13,6 +13,6 @@ NODES_TO_PRUNE = ['abstraction.n.01', 'abstraction.n.06', 'entity.n.01',
         'whole.n.02']
 
 if __name__ == "__main__":
-    cm = TEICorpusManager(CORPUS_PATH, TEIManager, XPATH)
+    cm = TEICorpus(CORPUS_PATH, TEIDocument, XPATH)
     tree = cm.generate_topic_tree(nodes_to_prune=NODES_TO_PRUNE)
     tree.render('tree.svg')

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from operator import itemgetter
-from data.topic_tree import TopicTree
+from bacalhau.topic_tree import TopicTree
 import nltk
 import os
 
 
-class CorpusManager(object):
+class Corpus(object):
 
     WORK_DIR = 'work'
 

@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from corpus_manager import CorpusManager
+from bacalhau.corpus.base import Corpus
 import nltk
 import os
 
 
-class TEICorpusManager(CorpusManager):
+class TEICorpus(Corpus):
 
     def __init__(self, corpuspath, manager, xpath,
             tokenizer=nltk.tokenize.regexp.WordPunctTokenizer(),
             stopwords=nltk.corpus.stopwords.words('english'),
-            workpath=CorpusManager.WORK_DIR):
+            workpath=Corpus.WORK_DIR):
         """Creates a new TEICorpusManager for the given path, using the given
         document Manager to process the files."""
-        super(TEICorpusManager, self).__init__(corpuspath, manager, tokenizer,
+        super(TEICorpus, self).__init__(corpuspath, manager, tokenizer,
                 stopwords, workpath)
         self._xpath = xpath
 

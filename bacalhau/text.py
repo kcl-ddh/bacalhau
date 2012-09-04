@@ -5,7 +5,7 @@ import re
 
 
 class Text(object):
-    """Represents a text unit from a file managed by an `ABCManager`."""
+    """Represents a text unit from a `Document`."""
 
     def __init__(self, key, filepath, content, tokenizer, stopwords):
         """Creates a new Text object."""
