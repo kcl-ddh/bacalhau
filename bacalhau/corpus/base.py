@@ -1,55 +1,80 @@
-# -*- coding: utf-8 -*-
-
+from collections import defaultdict
+from math import log
 from operator import itemgetter
-from bacalhau.topic_tree import TopicTree
-import nltk
 import os
+
+import nltk
+
+from bacalhau.topic_tree import TopicTree
 
 
 class Corpus(object):
 
     WORK_DIR = 'work'
 
-    def __init__(self, corpuspath, manager,
-            tokenizer=nltk.tokenize.regexp.WordPunctTokenizer(),
-            stopwords=nltk.corpus.stopwords.words('english'),
-            workpath=WORK_DIR):
-        """Creates a new CorpusManager for the given path, using the given
-        document Manager to process the files."""
-        self._path = os.path.abspath(corpuspath)
-        self._manager = manager
+    def __init__ (self, corpus_path, document_class,
+                  tokenizer=nltk.tokenize.regexp.WordPunctTokenizer(),
+                  stopwords=nltk.corpus.stopwords.words('english'),
+                  workpath=WORK_DIR):
+        """Creates a new Corpus for the given path, using the given
+        Document class to process the files."""
+        self._corpus_path = os.path.abspath(corpus_path)
+        self._document_class = document_class
         self._tokenizer = tokenizer
         self._stopwords = stopwords
-        self._work_path = os.path.abspath(workpath)
-        self._corpus = None
         self._textcollection = None
         self._texts = {}
-        self._tree = None
+        self._documents = self._get_documents(os.path.abspath(corpus_path))
+        # Total number of texts (not documents) in the corpus.
+        self._text_count = self._get_text_count()
+
+    def _get_documents (self, corpus_path):
+        """Returns a list of `Document` objects in this corpus."""
+        documents = []
+        for (path, dirs, files) in os.walk(corpus_path):
+            for filename in files:
+                document = self._document_class(
+                    os.path.join(path, filename), self._tokenizer,
+                    self._stopwords, *self._document_args)
+                documents.append(document)
+        return documents
+
+    def get_term_data (self):
+        """Returns term data for all of the `Document` objects in this
+        corpus."""
+        term_data = defaultdict(dict)
+        for document in self._documents:
+            document_term_data = document.get_term_data()
+            for term, new_term_data in document_term_data.items():
+                term_data[term].update(new_term_data)
+        return term_data
+
+    def _get_text_count (self):
+        """Returns a float of the number of `Text` objects in this
+        corpus."""
+        count = 0
+        for document in self._documents:
+            count += document.get_text_count()
+        return float(count)
+
+    def add_tf_idf (self, term_data):
+        """Returns `term_data` with a TF.IDF value added to each
+        term/text combination."""
+        for term, text_frequencies in term_data.items():
+            # Number of texts containing the term.
+            matches = len(text_frequencies)
+            idf = log(self._text_count / matches)
+            for text, text_data in text_frequencies.items():
+                text_data['tf.idf'] = text_data['frequency'] * idf
+        return term_data
 
     def generate_topic_tree(self, n_target_terms=10, nodes_to_prune=[],
             min_children=2):
         """Generates the topic tree for the corpus."""
-        self.prepare()
         self.extract(n_target_terms)
         self._tree = self.generate(nodes_to_prune, min_children)
 
         return self._tree
-
-    def prepare(self):
-        """Prepares the corpus for the topic tree generation."""
-        try:
-            os.mkdir(self._work_path)
-        except OSError:
-            pass
-
-        for (path, dirs, files) in os.walk(self._path):
-            for filename in files:
-                manager = self._manager(os.path.join(path, filename),
-                        self._work_path)
-                texts = manager.extract_texts()
-
-                for text in texts:
-                    self._texts[text._key] = text
 
     def extract(self, n_target_terms=10):
         """Extracts target tems from the texts: selects nouns, computes tf.idf,

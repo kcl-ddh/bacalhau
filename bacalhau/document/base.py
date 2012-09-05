@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import abc
 import os
 
@@ -9,18 +7,19 @@ class Document:
     should extend this class and override the abstract methods."""
     __metaclass__ = abc.ABCMeta
 
-    @classmethod
-    def __init__(self, filepath, workpath, tokenizer, stopwords):
-        """Creates a new TEIManager for the given file path."""
+    def __init__ (self, filepath, tokenizer, stopwords):
+        """Creates a new Document for the given file path."""
         self._path = os.path.abspath(filepath)
-        self._key = os.path.splitext(os.path.basename(self._path))[0]
+        self._document_id = os.path.splitext(os.path.basename(self._path))[0]
         self._base_filepath = os.path.splitext(self._path)[0]
-        self._work_path = os.path.abspath(workpath)
         self._tokenizer = tokenizer
         self._stopwords = stopwords
+        self._texts = self._get_texts(self._document_id)
 
     @abc.abstractmethod
-    def extract_texts(self):
-        """Returns a list of `Text` objects representing text sections from the
-        current file."""
+    def get_term_data (self):
+        """Returns term data for each `Text` within this document."""
         return
+
+    def get_text_count (self):
+        return len(self._texts)

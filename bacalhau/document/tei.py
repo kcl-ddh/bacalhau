@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
+from collections import defaultdict
+
+from lxml import etree
 
 from bacalhau.document.base import Document
 from bacalhau.text import Text
-from lxml import etree
-import os
 
 
-class TEIDocument(Document):
-    """Implementation of the abstract Manager class to work with TEI files."""
+class TEIDocument (Document):
+    """Implementation of the abstract Document class to work with TEI
+    files."""
 
     TEI_NAMESPACE = 'http://www.tei-c.org/ns/1.0'
     TEI = '{%s}' % TEI_NAMESPACE
@@ -15,26 +16,32 @@ class TEIDocument(Document):
     XML = '{%s}' % (XML_NAMESPACE)
     NS_MAP = {'tei': TEI_NAMESPACE, 'xml': XML_NAMESPACE}
 
-    def __init__(self, filepath, workpath, tokenizer, stopwords, xpath,
-            ns_map=NS_MAP):
-        super(TEIDocument, self).__init__(filepath, workpath, tokenizer,
-                stopwords)
+    def __init__(self, filepath, tokenizer, stopwords, xpath,
+                 ns_map=NS_MAP):
         self._xpath = xpath
         self._ns_map = ns_map
+        super(TEIDocument, self).__init__(filepath, tokenizer, stopwords)
 
-    def extract_texts(self):
-        """Returns a list of `Text` objects representing text sections from the
-        current file."""
-        tree = etree.parse(self._path)
-        el_list = tree.xpath(self._xpath, namespaces=self._ns_map)
+    def get_term_data (self):
+        """Returns term data for all of the `Text` objects within
+        this document."""
+        term_data = defaultdict(dict)
+        for text in self._texts:
+            text_term_data = text.get_term_data()
+            for term, new_term_data in text_term_data.items():
+                term_data[term].update(new_term_data)
+        return term_data
+
+    def _get_texts (self, document_id):
+        """Returns a list of `Text` objects within this document."""
         texts = []
-
-        for el in el_list:
-            xml_id = el.get(self.XML + 'id')
-            text_key = '%s-%s' % (self._key, xml_id)
-            text_filepath = os.path.join(self._work_path, text_key)
-            content = etree.tostring(el, encoding='utf-8', method='text')
-            texts.append(Text(text_key, text_filepath, content,
-                    self._tokenizer, self._stopwords))
-
+        tree = etree.parse(self._path)
+        text_elements = tree.xpath(self._xpath, namespaces=self._ns_map)
+        for text_element in text_elements:
+            xml_id = text_element.get(self.XML + 'id')
+            text_id = '%s-%s' % (document_id, xml_id)
+            content = etree.tostring(text_element, encoding='utf-8',
+                                     method='text')
+            texts.append(Text(text_id, content, self._tokenizer,
+                              self._stopwords))
         return texts

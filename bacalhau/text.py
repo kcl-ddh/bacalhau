@@ -1,50 +1,50 @@
-# -*- coding: utf-8 -*-
+import re
 
 from nltk.corpus import wordnet
-import re
 
 
 class Text(object):
     """Represents a text unit from a `Document`."""
 
-    def __init__(self, key, filepath, content, tokenizer, stopwords):
+    def __init__(self, text_id, content, tokenizer, stopwords):
         """Creates a new Text object."""
-        self._key = key
-        self._filepath = filepath
-        self._content = content
+        self._text_id = text_id
+        self._content = content.lower()
         self._tokenizer = tokenizer
         self._stopwords = stopwords
-        self._tf_idf_dict = {}
-        self._hypernyms_dict = {}
-        self._tree = None
 
-        tokens = self.tokenize(content)
-        tokens = self.prune_tokens(tokens)
-        unique_tokens = sorted(list(set(tokens)))
+    def get_term_data (self):
+        """Returns a dictionary of term data for this text.
 
-        text_file = open(filepath, 'w')
-        text_file.write('\n'.join(unique_tokens))
-        text_file.close()
+        Terms are keys, values are dictionaries of frequency counts
+        keyed by text id.
 
-    def tokenize(self, text):
-        """Returns a list of tokens, in lowercase, from the text."""
-        return [t.lower() for t in self._tokenizer.tokenize(text)]
-
-    def prune_tokens(self, tokens):
-        """Returns a list of tokens without stopwords, punctuation and tokens
-        that are not in WordNet."""
-        pruned_tokens = []
-
+        """
+        term_data = {}
+        tokens = self._tokenizer.tokenize(self._content)
+        max_token_count = 0
+        # This provides a "term count" that is unnormalised, meaning
+        # that the length of the text is not accounted for.
         for token in tokens:
-            if token in self._stopwords:
-                continue
+            if self._is_valid_token(token):
+                token_data = term_data.setdefault(token,
+                                                  {self._text_id: {'count': 0}})
+                if (token_data[self._text_id]['count'] + 1) > max_token_count:
+                    max_token_count += 1
+                term_data[token][self._text_id]['count'] += 1
+        # Normalise the term counts to provide a "term frequency" for
+        # each term.
+        for term, text_data in term_data.items():
+            count = float(text_data[self._text_id]['count'])
+            text_data[self._text_id]['frequency'] = count / max_token_count
+        return term_data
 
-            if re.search(r'[^A-Za-z]', token):
-                continue
-
-            if not wordnet.synsets(token, pos=wordnet.NOUN):
-                continue
-
-            pruned_tokens.append(token)
-
-        return pruned_tokens
+    def _is_valid_token (self, token):
+        """Returns True if `token` is suitable for processing."""
+        if token in self._stopwords:
+            return False
+        if re.search(r'[^A-Za-z]', token):
+            return False
+        if not wordnet.synsets(token, pos=wordnet.NOUN):
+            return False
+        return True
