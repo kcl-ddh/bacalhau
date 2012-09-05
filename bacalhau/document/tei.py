@@ -1,9 +1,7 @@
-from collections import defaultdict
-
-from lxml import etree
-
 from bacalhau.document.base import Document
 from bacalhau.text import Text
+from collections import defaultdict
+from lxml import etree
 
 
 class TEIDocument (Document):
@@ -22,7 +20,7 @@ class TEIDocument (Document):
         self._ns_map = ns_map
         super(TEIDocument, self).__init__(filepath, tokenizer, stopwords)
 
-    def get_term_data (self):
+    def get_term_data(self):
         """Returns term data for all of the `Text` objects within
         this document."""
         term_data = defaultdict(dict)
@@ -32,7 +30,7 @@ class TEIDocument (Document):
                 term_data[term].update(new_term_data)
         return term_data
 
-    def _get_texts (self, document_id):
+    def _get_texts(self, document_id):
         """Returns a list of `Text` objects within this document."""
         texts = []
         tree = etree.parse(self._path)

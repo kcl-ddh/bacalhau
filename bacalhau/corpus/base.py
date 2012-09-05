@@ -1,18 +1,15 @@
+from bacalhau.topic_tree import TopicTree
 from collections import defaultdict
 from math import log
-from operator import itemgetter
-import os
-
 import nltk
-
-from bacalhau.topic_tree import TopicTree
+import os
 
 
 class Corpus(object):
 
     WORK_DIR = 'work'
 
-    def __init__ (self, corpus_path, document_class,
+    def __init__(self, corpus_path, document_class,
                   tokenizer=nltk.tokenize.regexp.WordPunctTokenizer(),
                   stopwords=nltk.corpus.stopwords.words('english'),
                   workpath=WORK_DIR):
@@ -28,7 +25,7 @@ class Corpus(object):
         # Total number of texts (not documents) in the corpus.
         self._text_count = self._get_text_count()
 
-    def _get_documents (self, corpus_path):
+    def _get_documents(self, corpus_path):
         """Returns a list of `Document` objects in this corpus."""
         documents = []
         for (path, dirs, files) in os.walk(corpus_path):
@@ -39,7 +36,53 @@ class Corpus(object):
                 documents.append(document)
         return documents
 
-    def get_term_data (self):
+    def _get_text_count(self):
+        """Returns a float of the number of `Text` objects in this
+        corpus."""
+        count = 0
+        for document in self._documents:
+            count += document.get_text_count()
+        return float(count)
+
+    def generate_topic_tree(self, n_terms=10, nodes_to_prune=[],
+            min_children=2):
+        """Generates the topic tree for the corpus."""
+        top_terms = self.get_top_terms(n_terms)
+        hypernyms = self.get_hypernyms(top_terms)
+        tree = self.get_topic_tree(hypernyms, nodes_to_prune, min_children)
+
+        self._tree = tree
+
+        return tree
+
+    def get_top_terms(self, n_terms):
+        """Returns a list with the highest `n_terms` for each text from the
+        term data dictionary."""
+        term_data = self.add_tf_idf(self.get_term_data())
+        top_terms = defaultdict(list)
+        top_terms_meta = defaultdict(dict)
+
+        for term, data in term_data.iteritems():
+            for text, v in data.iteritems():
+                count = len(top_terms[text])
+                tf_idf = v['tf.idf']
+
+                if count < n_terms:
+                    top_terms[text].append(term)
+                    top_terms_meta[text][tf_idf] = term
+                else:
+                    lower_tf_idf = sorted(top_terms_meta[text])[0]
+
+                    if tf_idf > lower_tf_idf:
+                        lower_term = top_terms_meta[text][lower_tf_idf]
+                        top_terms[text].remove(lower_term)
+                        top_terms[text].append(term)
+                        top_terms_meta[text].pop(lower_tf_idf)
+                        top_terms_meta[text][tf_idf] = term
+
+        return top_terms
+
+    def get_term_data(self):
         """Returns term data for all of the `Document` objects in this
         corpus."""
         term_data = defaultdict(dict)
@@ -49,15 +92,7 @@ class Corpus(object):
                 term_data[term].update(new_term_data)
         return term_data
 
-    def _get_text_count (self):
-        """Returns a float of the number of `Text` objects in this
-        corpus."""
-        count = 0
-        for document in self._documents:
-            count += document.get_text_count()
-        return float(count)
-
-    def add_tf_idf (self, term_data):
+    def add_tf_idf(self, term_data):
         """Returns `term_data` with a TF.IDF value added to each
         term/text combination."""
         for term, text_frequencies in term_data.items():
@@ -68,75 +103,42 @@ class Corpus(object):
                 text_data['tf.idf'] = text_data['frequency'] * idf
         return term_data
 
-    def generate_topic_tree(self, n_target_terms=10, nodes_to_prune=[],
-            min_children=2):
-        """Generates the topic tree for the corpus."""
-        self.extract(n_target_terms)
-        self._tree = self.generate(nodes_to_prune, min_children)
+    def get_hypernyms(self, top_terms):
+        """Returns the hypernyms for the given terms."""
+        hypernyms = defaultdict(dict)
 
-        return self._tree
+        for text, terms in top_terms.iteritems():
+            for term in terms:
+                hypernyms[text][term] = self.get_hypernym(term)
 
-    def extract(self, n_target_terms=10):
-        """Extracts target tems from the texts: selects nouns, computes tf.idf,
-        and creates hypernym paths for the target terms."""
-        self._corpus = nltk.corpus.PlaintextCorpusReader(self._work_path, '.*')
-        self._textcollection = nltk.text.TextCollection(self._corpus)
+        return hypernyms
 
-        for f in self._corpus.fileids():
-            tf_idf_dict = {}
+    def get_hypernym(self, word):
+        """Returns a list of the hypernyms for the given word."""
+        hypernym = [word]
 
-            for w in self._corpus.words(fileids=f):
-                tf_idf_dict[w] = self._textcollection.tf_idf(w,
-                        self._textcollection)
+        synsets = nltk.corpus.wordnet.synsets(word)
+        while len(synsets) > 0:
+            s = synsets[0]
+            hypernym.append(s.name)
+            synsets = s.hypernyms()
 
-            text = self._texts[f]
-            text._tf_idf_dict = tf_idf_dict
+        return hypernym
 
-            tf_idf_dict = sorted(tf_idf_dict.iteritems(), key=itemgetter(1),
-                    reverse=True)
-
-            hypernyms_dict = {}
-
-            for idx, item in enumerate(tf_idf_dict):
-                if idx >= n_target_terms:
-                    break
-
-                word = item[0]
-                hypernyms_dict[word] = []
-                hypernyms_dict[word].append(word)
-
-                synsets = nltk.corpus.wordnet.synsets(word)
-
-                while len(synsets) > 0:
-                    syn = synsets[0]
-                    name = syn.name
-                    hypernyms_dict[word].append(name)
-                    synsets = syn.hypernyms()
-
-            text._hypernyms_dict = hypernyms_dict
-
-    def generate(self, nodes_to_prune=[], min_children=2):
-        """Generates topic tree: creates hypernym paths for the target terms,
-        generates topic tree for the hypernym paths, compresses the topic
-        tree."""
+    def get_topic_tree(self, hypernyms, nodes_to_prune=[], min_children=2):
+        """Generates and returns a `TopicTree` for the given hypernyms."""
         tree = TopicTree()
 
-        for text in self._texts.values():
-            for hypernym in text._hypernyms_dict.values():
-                if len(hypernym) > 0:
-                    tree.add_nodes_from(hypernym)
-                    tree.node[hypernym[0]]['is_leaf'] = True
-                    tree.node[hypernym[0]]['group'] = 'leaf'
-                    tree.node[hypernym[len(hypernym) - 1]]['is_root'] = True
-                    tree.node[hypernym[len(hypernym) - 1]]['group'] = 'root'
-                    hypernym.reverse()
-                    tree.add_path(hypernym)
+        for text, data in hypernyms.iteritems():
+            for term, hypernym in data.iteritems():
+                tree.add_nodes_from(hypernym)
+                tree.node[hypernym[0]]['is_leaf'] = True
+                tree.node[hypernym[len(hypernym) - 1]]['is_root'] = True
+                hypernym.reverse()
+                tree.add_path(hypernym)
 
         tree = self._compress_and_prune_tree(tree, nodes_to_prune,
                 min_children)
-
-        for text in self._texts.values():
-            text._tree = tree
 
         return tree
 

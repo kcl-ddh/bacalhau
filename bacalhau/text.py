@@ -1,6 +1,5 @@
-import re
-
 from nltk.corpus import wordnet
+import re
 
 
 class Text(object):
@@ -13,7 +12,7 @@ class Text(object):
         self._tokenizer = tokenizer
         self._stopwords = stopwords
 
-    def get_term_data (self):
+    def get_term_data(self):
         """Returns a dictionary of term data for this text.
 
         Terms are keys, values are dictionaries of frequency counts
@@ -28,7 +27,7 @@ class Text(object):
         for token in tokens:
             if self._is_valid_token(token):
                 token_data = term_data.setdefault(token,
-                                                  {self._text_id: {'count': 0}})
+                        {self._text_id: {'count': 0}})
                 if (token_data[self._text_id]['count'] + 1) > max_token_count:
                     max_token_count += 1
                 term_data[token][self._text_id]['count'] += 1
@@ -39,7 +38,7 @@ class Text(object):
             text_data[self._text_id]['frequency'] = count / max_token_count
         return term_data
 
-    def _is_valid_token (self, token):
+    def _is_valid_token(self, token):
         """Returns True if `token` is suitable for processing."""
         if token in self._stopwords:
             return False
