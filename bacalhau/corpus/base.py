@@ -19,11 +19,11 @@ class Corpus(object):
         self._document_class = document_class
         self._tokenizer = tokenizer
         self._stopwords = stopwords
-        self._textcollection = None
-        self._texts = {}
         self._documents = self._get_documents(os.path.abspath(corpus_path))
         # Total number of texts (not documents) in the corpus.
         self._text_count = self._get_text_count()
+        self._hypernyms = None
+        self._tree = None
 
     def _get_documents(self, corpus_path):
         """Returns a list of `Document` objects in this corpus."""
@@ -51,6 +51,7 @@ class Corpus(object):
         hypernyms = self.get_hypernyms(top_terms)
         tree = self.get_topic_tree(hypernyms, nodes_to_prune, min_children)
 
+        self._hypernyms = hypernyms
         self._tree = tree
 
         return tree
@@ -209,3 +210,21 @@ class Corpus(object):
                 tree.remove_node(node)
 
         return tree
+
+    def annotate_topic_tree(self):
+        hypernyms = self._hypernyms
+        tree = self._tree
+
+        for text, data in hypernyms.iteritems():
+            for hypernym in data.values():
+                for node in tree.nbunch_iter(hypernym):
+                    if 'texts' not in tree.node[node]:
+                        tree.node[node]['texts'] = []
+                    tree.node[node]['texts'].append(text)
+
+                    if 'count' not in tree.node[node]:
+                        tree.node[node]['count'] = 0
+                    tree.node[node]['count'] = tree.node[node]['count'] + 1
+
+        return tree
+
