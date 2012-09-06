@@ -44,12 +44,11 @@ class Corpus(object):
             count += document.get_text_count()
         return float(count)
 
-    def generate_topic_tree(self, n_terms=10, nodes_to_prune=[],
-            min_children=2):
+    def generate_topic_tree(self, n_terms=10):
         """Generates the topic tree for the corpus."""
         top_terms = self.get_top_terms(n_terms)
         hypernyms = self.get_hypernyms(top_terms)
-        tree = self.get_topic_tree(hypernyms, nodes_to_prune, min_children)
+        tree = self.get_topic_tree(hypernyms)
 
         self._hypernyms = hypernyms
         self._tree = tree
@@ -126,7 +125,7 @@ class Corpus(object):
 
         return hypernym
 
-    def get_topic_tree(self, hypernyms, nodes_to_prune=[], min_children=2):
+    def get_topic_tree(self, hypernyms):
         """Generates and returns a `TopicTree` for the given hypernyms."""
         tree = TopicTree()
 
@@ -138,77 +137,6 @@ class Corpus(object):
                 hypernym.reverse()
                 tree.add_path(hypernym)
 
-        tree = self._compress_and_prune_tree(tree, nodes_to_prune,
-                min_children)
-
-        return tree
-
-    def _compress_and_prune_tree(self, tree, nodes_to_prune, min_children):
-        """Compresses the tree using the castanet algorithm:
-        1. starting from the leaves, recursively eliminate a parent that has
-        fewer than 2 children, unless the parent is the root
-        2. eliminate a child whose name appears within the parent's name."""
-        for n in tree.nodes(data=True):
-            if 'is_leaf' in n[1]:
-                tree = self._eliminate_parents(tree, n[0], min_children)
-
-        for n in tree.nodes(data=True):
-            if 'is_leaf' in n[1]:
-                tree = self._eliminate_child_with_parent_name(tree, n[0])
-
-        tree = self._prune_tree(tree, nodes_to_prune)
-
-        return tree
-
-    def _eliminate_parents(self, tree, node, min_children=2):
-        """Recursively eliminates a parent of the current node that has fewer
-        than min_children children, unless the parent is the root."""
-        for p in tree.predecessors(node):
-            if tree.has_node(p):
-                n_children = len(tree.out_edges(p))
-                has_parent = len(tree.predecessors(p)) > 0
-
-                if n_children < min_children and has_parent:
-                    ancestor = tree.predecessors(p)[0]
-                    children = tree.successors(p)
-
-                    tree.remove_node(p)
-
-                    for child in children:
-                        tree.add_edge(ancestor, child)
-
-                    self._eliminate_parents(tree, node)
-                else:
-                    self._eliminate_parents(tree, p)
-
-        return tree
-
-    def _eliminate_child_with_parent_name(self, tree, node):
-        """Eliminate a child whose name appears within the parent's name."""
-        for p in tree.predecessors(node):
-            if tree.has_node(p):
-                node_name = node[:node.find('.')]
-                p_name = p[:p.find('.')]
-
-                if node_name in p_name or p_name in node_name:
-                    children = tree.successors(node)
-                    tree.remove_node(node)
-
-                    for child in children:
-                        tree.add_edge(p, child)
-
-                    self._eliminate_child_with_parent_name(tree, p)
-                else:
-                    self._eliminate_child_with_parent_name(tree, p)
-
-        return tree
-
-    def _prune_tree(self, tree, nodes):
-        """Removes the nodes from the tree."""
-        for node in nodes:
-            if tree.has_node(node):
-                tree.remove_node(node)
-
         return tree
 
     def annotate_topic_tree(self):
@@ -218,13 +146,11 @@ class Corpus(object):
         for text, data in hypernyms.iteritems():
             for hypernym in data.values():
                 for node in tree.nbunch_iter(hypernym):
-                    if 'texts' not in tree.node[node]:
-                        tree.node[node]['texts'] = []
-                    tree.node[node]['texts'].append(text)
+                    texts = tree.node[node].setdefault('texts', [])
+                    texts.append(text)
 
                     if 'count' not in tree.node[node]:
                         tree.node[node]['count'] = 0
-                    tree.node[node]['count'] = tree.node[node]['count'] + 1
+                    tree.node[node]['count'] += 1
 
         return tree
-
