@@ -90,6 +90,7 @@ class Corpus(object):
             document_term_data = document.get_term_data()
             for term, new_term_data in document_term_data.items():
                 term_data[term].update(new_term_data)
+
         return term_data
 
     def add_tf_idf(self, term_data):
@@ -101,15 +102,24 @@ class Corpus(object):
             idf = log(self._text_count / matches)
             for text, text_data in text_frequencies.items():
                 text_data['tf.idf'] = text_data['frequency'] * idf
+
         return term_data
 
     def get_hypernyms(self, top_terms):
         """Returns the hypernyms for the given terms."""
         hypernyms = defaultdict(dict)
+        cache = {}
 
         for text, terms in top_terms.iteritems():
             for term in terms:
-                hypernyms[text][term] = self.get_hypernym(term)
+                h = cache.get(term)
+
+                if h is None:
+                    h = self.get_hypernym(term)
+                    h.reverse()
+                    cache[term] = h
+
+                hypernyms[text][term] = h
 
         return hypernyms
 
@@ -132,9 +142,8 @@ class Corpus(object):
         for text, data in hypernyms.iteritems():
             for term, hypernym in data.iteritems():
                 tree.add_nodes_from(hypernym)
-                tree.node[hypernym[0]]['is_leaf'] = True
-                tree.node[hypernym[len(hypernym) - 1]]['is_root'] = True
-                hypernym.reverse()
+                tree.node[hypernym[len(hypernym) - 1]]['is_leaf'] = True
+                tree.node[hypernym[0]]['is_root'] = True
                 tree.add_path(hypernym)
 
         return tree
