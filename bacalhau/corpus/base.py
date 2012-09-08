@@ -7,12 +7,9 @@ import os
 
 class Corpus(object):
 
-    WORK_DIR = 'work'
-
     def __init__(self, corpus_path, document_class,
                   tokenizer=nltk.tokenize.regexp.WordPunctTokenizer(),
-                  stopwords=nltk.corpus.stopwords.words('english'),
-                  workpath=WORK_DIR):
+                  stopwords=nltk.corpus.stopwords.words('english')):
         """Creates a new Corpus for the given path, using the given
         Document class to process the files."""
         self._corpus_path = os.path.abspath(corpus_path)
