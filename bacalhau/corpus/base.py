@@ -6,24 +6,24 @@ import os
 
 
 class Corpus(object):
-    """A manager class to generate topic hierarchies from files.""" 
+    """A manager class to generate topic hierarchies from files."""
 
     def __init__(self, corpus_path, document_class,
             tokenizer=nltk.tokenize.regexp.WordPunctTokenizer(),
             stopwords=nltk.corpus.stopwords.words('english')):
-        """Creates a new `Corpus` for the given path, using the given
-        `Document` class to process the files.
+        """Creates a new `.Corpus` for the given path, using the given
+        `bacalhau.document.base.Document` class to process the files.
 
         :param corpus_path: path to the files.
-        :type corpus_path: str.
-        :param document_class: `Document` to process the corpus files.
-        :type document_class: `Document`.
+        :type corpus_path: `str`
+        :param document_class: document class used to process the corpus files.
+        :type document_class: `bacalhau.document.base.Document`
         :param tokenizer: tokenizer used to tokenize the files in the corpus,
             defaults to `nltk.tokenize.regexp.WordPunctTokenizer`.
-        :type tokenizer: `nltk.tokenize.api.TokenizerI`.
+        :type tokenizer: `nltk.tokenize.api.TokenizerI`
         :param stopwords: words to be removed from the texts, defaults to
             `nltk.corpus.stopwords.words(\'english\')`.
-        :type stopwords: `list` of words.
+        :type stopwords: `list`
         """
         self._corpus_path = os.path.abspath(corpus_path)
         self._document_class = document_class
@@ -40,8 +40,8 @@ class Corpus(object):
         returns them in a `list`.
 
         :param corpus_path: path to the corpus files.
-        :type corpus_path: str.
-        :returns: `list` of `Document`\'s.
+        :type corpus_path: `str`
+        :returns: `list` of `bacalhau.document.base.Document`\'s.
         """
         documents = []
 
@@ -55,10 +55,10 @@ class Corpus(object):
         return documents
 
     def _get_text_count(self):
-        """Returns a float of the number of `Text` objects in this
+        """Returns the number of `bacalhau.text.Text` objects in this
         corpus.
 
-        :returns: float.
+        :rtype: `float`
         """
         count = 0
 
@@ -72,10 +72,10 @@ class Corpus(object):
         from each `Text`. First extracts top terms; second gets hypernyms for
         each of the terms; third creates the `TopicTree` using the hypernyms.
 
-        :param n_terms: maximum number of terms to be used from each `Text`,
-            defauls to 10.
-        :type n_terms: int.
-        :returns: `TopicTree` -- the topic tree.
+        :param n_terms: maximum number of terms to be used from each `Text`.
+        :type n_terms: `int`
+        :returns: the generated topic tree
+        :rtype: `bacalhau.topic_tree.TopicTree`
         """
         top_terms = self.get_top_terms(n_terms)
         hypernyms = self.get_hypernyms(top_terms)
@@ -87,11 +87,11 @@ class Corpus(object):
         return tree
 
     def get_top_terms(self, n_terms):
-        """Returns a dictionary with the highest `n_terms` for each `Text` from
-        the term data dictionary.
+        """Returns a dictionary with the highest `n_terms` for each
+        `bacalhau.text.Text` from the term data dictionary.
 
-        :param n_terms: maximum number of terms to be used from each `Text`.
-        :type n_terms: int.
+        :param n_terms: maximum number of terms to be used from each text.
+        :type n_terms: `int`
         :returns: dict.
         """
         term_data = self._add_tf_idf(self._get_term_data())
@@ -119,10 +119,10 @@ class Corpus(object):
         return top_terms
 
     def _get_term_data(self):
-        """Returns term data for all of the `Document` objects in this
-        corpus.
+        """Returns term data for all of the
+        `bacalhau.document.base.Document` objects in this corpus.
 
-        :returns: dict.
+        :rtype: `dict`
         """
         term_data = defaultdict(dict)
         for document in self._documents:
@@ -137,8 +137,8 @@ class Corpus(object):
         term/text combination.
 
         :param term_data: dict with term/text combination.
-        :type term_data: dict.
-        :returns: dict.
+        :type term_data: `dict`
+        :rtype: `dict`
         """
         for term, text_frequencies in term_data.items():
             # Number of texts containing the term.
@@ -153,7 +153,7 @@ class Corpus(object):
         """Returns a dictionary with the hypernyms for the given terms.
 
         :param top_terms: dict with term/text information.
-        :type top_terms: dict.
+        :type top_terms: `dict`
         :returns: dict -- {text: {term: hypernym}}.
         """
         hypernyms = defaultdict(dict)
@@ -176,8 +176,8 @@ class Corpus(object):
         """Returns a list of the hypernyms for the given word.
 
         :param word: the word to get the hypernym for.
-        :type word: str.
-        :returns: list -- hypernyms.
+        :type word: `str`
+        :rtype: `list`
         """
         hypernym = [word]
 
@@ -190,11 +190,12 @@ class Corpus(object):
         return hypernym
 
     def get_topic_tree(self, hypernyms):
-        """Generates and returns a `TopicTree` for the given hypernyms.
+        """Generates and returns a `bacalhau.topic_tree.TopicTree` for
+        the given hypernyms.
 
         :param hypernyms: dictionary of hypernyms.
-        :type hypernyms: dict.
-        :returns: `TopicTree` -- the topic tree.
+        :type hypernyms: `dict`
+        :rtype: `bacalhau.topic_tree.TopicTree`
         """
         tree = TopicTree()
 
@@ -208,10 +209,11 @@ class Corpus(object):
         return tree
 
     def annotate_topic_tree(self):
-        """Annotates the nodes in the `TopicTree` with information about which
-        `Text` and counts the nodes relate to.
+        """Annotates the nodes in the `bacalhau.topic_tree.TopicTree`
+        with information about which `Text` and counts the nodes
+        relate to.
 
-        :returns: `TopicTree` -- annotated topic tree.
+        :rtype: `bacalhau.topic_tree.TopicTree`
         """
         hypernyms = self._hypernyms
         tree = self._tree

@@ -11,11 +11,11 @@ class Document:
         """Creates a new `Document` for the given file path.
 
         :param filepath: path to the file.
-        :type filepath: str.
+        :type filepath: `str`
         :param tokenizer: tokenizer used to tokenize the files in the corpus.
-        :type tokenizer: `nltk.tokenize.api.TokenizerI`.
+        :type tokenizer: `nltk.tokenize.api.TokenizerI`
         :param stopwords: words to be removed from the texts.
-        :type stopwords: `list` of words.
+        :type stopwords: `list`
         """
         self._path = os.path.abspath(filepath)
         self._document_id = os.path.splitext(os.path.basename(self._path))[0]
@@ -26,23 +26,27 @@ class Document:
 
     @abc.abstractmethod
     def get_texts(self):
-        """Returns a list of `Text` objects within this document.
+        """Returns a list of `bacalhau.text.Text` objects within this
+        document.
 
-        :returns: list -- list of `Text` objects.
+        :returns: list of `bacalhau.text.Text` objects.
+        :rtype: `list`
         """
         return
 
     @abc.abstractmethod
     def get_term_data(self):
-        """Returns term data for each `Text` within this document.
+        """Returns term data for each `bacalhau.text.Text` within this document.
 
-        :returns: dict.
+        :returns: `dict`
         """
         return
 
     def get_text_count(self):
-        """Returns the number of `Text` objects for this `Document`.
+        """Returns the number of `bacalhau.text.Text` objects for this
+        `.Document`.
 
-        :returns: int -- number of `Text` objects.
+        :returns: number of `bacalhau.text.Text` objects.
+        :rtype: `int`
         """
         return len(self._texts)

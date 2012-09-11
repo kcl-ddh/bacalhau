@@ -8,11 +8,11 @@ class TopicTree(nx.DiGraph):
     """Represents a TopicTree. Extends `networkx.DiGraph`."""
 
     def __init__(self, data=None, **attr):
-        """Creates a new `TopicTree`.
+        """Creates a new `.TopicTree`.
 
         :param data: data to initialize the tree with. If no data is supplied
             an empty tree is created.
-        :type data: list, `TopicTree` or any `networkx` graph object.
+        :type data: `list`, `.TopicTree` or any `networkx` graph object.
         :param attr: keyword arguments to add to the tree.
         :type attr: key/value pairs.
         """
@@ -98,7 +98,7 @@ class TopicTree(nx.DiGraph):
                 self.remove_node(node)
 
     def render(self, filepath, format='svg', prog='dot', attributes={}):
-        """Renders the tree into the file at filepath."""
+        """Renders the tree into the file at `filepath`."""
         agraph = nx.to_agraph(self)
 
         for key, value in attributes.iteritems():

@@ -5,8 +5,8 @@ from lxml import etree
 
 
 class TEIDocument (Document):
-    """Implementation of the abstract Document class to work with TEI
-    files."""
+    """Implementation of the abstract
+    `bacalhau.document.base.Document` class to work with TEI files."""
 
     TEI_NAMESPACE = 'http://www.tei-c.org/ns/1.0'
     TEI = '{%s}' % TEI_NAMESPACE
@@ -16,27 +16,29 @@ class TEIDocument (Document):
 
     def __init__(self, filepath, tokenizer, stopwords, xpath,
                  ns_map=NS_MAP):
-        """Creates a new `Document` for the given file path.
+        """Creates a new `.TEIDocument` for the given file path.
 
         :param filepath: path to the file.
-        :type filepath: str.
+        :type filepath: `str`
         :param tokenizer: tokenizer used to tokenize the files in the corpus.
-        :type tokenizer: `nltk.tokenize.api.TokenizerI`.
+        :type tokenizer: `nltk.tokenize.api.TokenizerI`
         :param stopwords: words to be removed from the texts.
-        :type stopwords: `list` of words.
+        :type stopwords: `list`
         :param xpath: XPath where to get the `Text` from the TEI files.
-        :type xpath: str.
-        :param ns_map: dictionary of namespaces in the `Document`.
-        :type ns_map: dict.
+        :type xpath: `str`
+        :param ns_map: namespaces used in the `Document`.
+        :type ns_map: `dict`
         """
         self._xpath = xpath
         self._ns_map = ns_map
         super(TEIDocument, self).__init__(filepath, tokenizer, stopwords)
 
     def get_texts(self):
-        """Returns a list of `Text` objects within this document.
+        """Returns a list of `bacalhau.text.Text` objects within this
+        document.
 
-        :returns: list -- list of `Text` objects.
+        :returns: `bacalhau.text.Text` objects within this document.
+        :rtype: `list`
         """
         texts = []
         tree = etree.parse(self._path)
@@ -51,9 +53,10 @@ class TEIDocument (Document):
         return texts
 
     def get_term_data(self):
-        """Returns term data for each `Text` within this document.
+        """Returns term data for each `bacalhau.text.Text` within this
+        document.
 
-        :returns: dict.
+        :rtype: `dict`
         """
         term_data = defaultdict(dict)
         for text in self._texts:
