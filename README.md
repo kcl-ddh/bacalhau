@@ -10,5 +10,4 @@ https://github.com/kcl-ddh/bacalhau/
 
 Documentation
 -------------
-
-
+http://bacalhau.readthedocs.org/en/latest/
