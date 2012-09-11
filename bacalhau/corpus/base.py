@@ -6,12 +6,25 @@ import os
 
 
 class Corpus(object):
+    """A manager class to generate topic hierarchies from files.""" 
 
     def __init__(self, corpus_path, document_class,
-                  tokenizer=nltk.tokenize.regexp.WordPunctTokenizer(),
-                  stopwords=nltk.corpus.stopwords.words('english')):
-        """Creates a new Corpus for the given path, using the given
-        Document class to process the files."""
+            tokenizer=nltk.tokenize.regexp.WordPunctTokenizer(),
+            stopwords=nltk.corpus.stopwords.words('english')):
+        """Creates a new `Corpus` for the given path, using the given
+        `Document` class to process the files.
+
+        :param corpus_path: path to the files.
+        :type corpus_path: str.
+        :param document_class: `Document` to process the corpus files.
+        :type document_class: `Document`.
+        :param tokenizer: tokenizer used to tokenize the files in the corpus,
+            defaults to `nltk.tokenize.regexp.WordPunctTokenizer`.
+        :type tokenizer: `nltk.tokenize.api.TokenizerI`.
+        :param stopwords: words to be removed from the texts, defaults to
+            `nltk.corpus.stopwords.words(\'english\')`.
+        :type stopwords: `list` of words.
+        """
         self._corpus_path = os.path.abspath(corpus_path)
         self._document_class = document_class
         self._tokenizer = tokenizer
@@ -23,26 +36,47 @@ class Corpus(object):
         self._tree = None
 
     def _get_documents(self, corpus_path):
-        """Returns a list of `Document` objects in this corpus."""
+        """Creates a `Document` object for each of the files in the corpus, and
+        returns them in a `list`.
+
+        :param corpus_path: path to the corpus files.
+        :type corpus_path: str.
+        :returns: `list` of `Document`\'s.
+        """
         documents = []
+
         for (path, dirs, files) in os.walk(corpus_path):
             for filename in files:
                 document = self._document_class(
-                    os.path.join(path, filename), self._tokenizer,
-                    self._stopwords, *self._document_args)
+                        os.path.join(path, filename), self._tokenizer,
+                        self._stopwords, *self._document_args)
                 documents.append(document)
+
         return documents
 
     def _get_text_count(self):
         """Returns a float of the number of `Text` objects in this
-        corpus."""
+        corpus.
+
+        :returns: float.
+        """
         count = 0
+
         for document in self._documents:
             count += document.get_text_count()
+
         return float(count)
 
     def generate_topic_tree(self, n_terms=10):
-        """Generates the topic tree for the corpus."""
+        """Generates a `TopicTree` for the corpus, using a maximum of `n_terms`
+        from each `Text`. First extracts top terms; second gets hypernyms for
+        each of the terms; third creates the `TopicTree` using the hypernyms.
+
+        :param n_terms: maximum number of terms to be used from each `Text`,
+            defauls to 10.
+        :type n_terms: int.
+        :returns: `TopicTree` -- the topic tree.
+        """
         top_terms = self.get_top_terms(n_terms)
         hypernyms = self.get_hypernyms(top_terms)
         tree = self.get_topic_tree(hypernyms)
@@ -53,9 +87,14 @@ class Corpus(object):
         return tree
 
     def get_top_terms(self, n_terms):
-        """Returns a list with the highest `n_terms` for each text from the
-        term data dictionary."""
-        term_data = self.add_tf_idf(self.get_term_data())
+        """Returns a dictionary with the highest `n_terms` for each `Text` from
+        the term data dictionary.
+
+        :param n_terms: maximum number of terms to be used from each `Text`.
+        :type n_terms: int.
+        :returns: dict.
+        """
+        term_data = self._add_tf_idf(self._get_term_data())
         top_terms = defaultdict(list)
         top_terms_meta = defaultdict(dict)
 
@@ -79,9 +118,12 @@ class Corpus(object):
 
         return top_terms
 
-    def get_term_data(self):
+    def _get_term_data(self):
         """Returns term data for all of the `Document` objects in this
-        corpus."""
+        corpus.
+
+        :returns: dict.
+        """
         term_data = defaultdict(dict)
         for document in self._documents:
             document_term_data = document.get_term_data()
@@ -90,9 +132,14 @@ class Corpus(object):
 
         return term_data
 
-    def add_tf_idf(self, term_data):
+    def _add_tf_idf(self, term_data):
         """Returns `term_data` with a TF.IDF value added to each
-        term/text combination."""
+        term/text combination.
+
+        :param term_data: dict with term/text combination.
+        :type term_data: dict.
+        :returns: dict.
+        """
         for term, text_frequencies in term_data.items():
             # Number of texts containing the term.
             matches = len(text_frequencies)
@@ -103,7 +150,12 @@ class Corpus(object):
         return term_data
 
     def get_hypernyms(self, top_terms):
-        """Returns the hypernyms for the given terms."""
+        """Returns a dictionary with the hypernyms for the given terms.
+
+        :param top_terms: dict with term/text information.
+        :type top_terms: dict.
+        :returns: dict -- {text: {term: hypernym}}.
+        """
         hypernyms = defaultdict(dict)
         cache = {}
 
@@ -112,7 +164,7 @@ class Corpus(object):
                 h = cache.get(term)
 
                 if h is None:
-                    h = self.get_hypernym(term)
+                    h = self._get_hypernym(term)
                     h.reverse()
                     cache[term] = h
 
@@ -120,8 +172,13 @@ class Corpus(object):
 
         return hypernyms
 
-    def get_hypernym(self, word):
-        """Returns a list of the hypernyms for the given word."""
+    def _get_hypernym(self, word):
+        """Returns a list of the hypernyms for the given word.
+
+        :param word: the word to get the hypernym for.
+        :type word: str.
+        :returns: list -- hypernyms.
+        """
         hypernym = [word]
 
         synsets = nltk.corpus.wordnet.synsets(word)
@@ -133,7 +190,12 @@ class Corpus(object):
         return hypernym
 
     def get_topic_tree(self, hypernyms):
-        """Generates and returns a `TopicTree` for the given hypernyms."""
+        """Generates and returns a `TopicTree` for the given hypernyms.
+
+        :param hypernyms: dictionary of hypernyms.
+        :type hypernyms: dict.
+        :returns: `TopicTree` -- the topic tree.
+        """
         tree = TopicTree()
 
         for text, data in hypernyms.iteritems():
@@ -146,6 +208,11 @@ class Corpus(object):
         return tree
 
     def annotate_topic_tree(self):
+        """Annotates the nodes in the `TopicTree` with information about which
+        `Text` and counts the nodes relate to.
+
+        :returns: `TopicTree` -- annotated topic tree.
+        """
         hypernyms = self._hypernyms
         tree = self._tree
 

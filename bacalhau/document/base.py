@@ -8,23 +8,41 @@ class Document:
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, filepath, tokenizer, stopwords):
-        """Creates a new Document for the given file path."""
+        """Creates a new `Document` for the given file path.
+
+        :param filepath: path to the file.
+        :type filepath: str.
+        :param tokenizer: tokenizer used to tokenize the files in the corpus.
+        :type tokenizer: `nltk.tokenize.api.TokenizerI`.
+        :param stopwords: words to be removed from the texts.
+        :type stopwords: `list` of words.
+        """
         self._path = os.path.abspath(filepath)
         self._document_id = os.path.splitext(os.path.basename(self._path))[0]
         self._base_filepath = os.path.splitext(self._path)[0]
         self._tokenizer = tokenizer
         self._stopwords = stopwords
-        self._texts = self._get_texts(self._document_id)
+        self._texts = self.get_texts()
+
+    @abc.abstractmethod
+    def get_texts(self):
+        """Returns a list of `Text` objects within this document.
+
+        :returns: list -- list of `Text` objects.
+        """
+        return
 
     @abc.abstractmethod
     def get_term_data(self):
-        """Returns term data for each `Text` within this document."""
+        """Returns term data for each `Text` within this document.
+
+        :returns: dict.
+        """
         return
 
     def get_text_count(self):
-        return len(self._texts)
+        """Returns the number of `Text` objects for this `Document`.
 
-    @abc.abstractmethod
-    def _get_texts(self, document_id):
-        """Returns a list of `Text` objects within this document."""
-        return
+        :returns: int -- number of `Text` objects.
+        """
+        return len(self._texts)

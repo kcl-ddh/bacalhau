@@ -6,7 +6,17 @@ class Text(object):
     """Represents a text unit from a `Document`."""
 
     def __init__(self, text_id, content, tokenizer, stopwords):
-        """Creates a new Text object."""
+        """Creates a new Text object.
+
+        :param text_id: id of the `Text`.
+        :type text_id: str.
+        :param content: content of the `Text`.
+        :type content: str.
+        :param tokenizer: tokenizer used to tokenize the files in the corpus.
+        :type tokenizer: `nltk.tokenize.api.TokenizerI`.
+        :param stopwords: words to be removed from the texts.
+        :type stopwords: `list` of words.
+        """
         self._text_id = text_id
         self._content = content.lower()
         self._tokenizer = tokenizer
@@ -15,9 +25,8 @@ class Text(object):
     def get_term_data(self):
         """Returns a dictionary of term data for this text.
 
-        Terms are keys, values are dictionaries of frequency counts
-        keyed by text id.
-
+        :returns: dict -- Terms are keys, values are dictionaries of frequency
+            counts keyed by text id.
         """
         term_data = {}
         tokens = self._tokenizer.tokenize(self._content)
@@ -39,7 +48,12 @@ class Text(object):
         return term_data
 
     def _is_valid_token(self, token):
-        """Returns True if `token` is suitable for processing."""
+        """Checks if the `token` is suitable for processing.
+
+        :param token: the token to validate.
+        :type token: str.
+        :returns: bool -- True if `token` is valid.
+        """
         if token in self._stopwords:
             return False
         if re.search(r'[^A-Za-z]', token):
