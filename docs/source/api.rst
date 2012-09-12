@@ -7,10 +7,8 @@ Classes
 -------
 
 .. toctree::
-  corpusbase
-  corpustei
+  corpus
   documentbase
   documenttei
   text
   topictree
-

@@ -1,16 +1,19 @@
-from bacalhau.topic_tree import TopicTree
 from collections import defaultdict
 from math import log
-import nltk
 import os
+
+import nltk
+
+from bacalhau.topic_tree import TopicTree
 
 
 class Corpus(object):
     """A manager class to generate topic hierarchies from files."""
 
     def __init__(self, corpus_path, document_class,
-            tokenizer=nltk.tokenize.regexp.WordPunctTokenizer(),
-            stopwords=nltk.corpus.stopwords.words('english')):
+                 tokenizer=nltk.tokenize.regexp.WordPunctTokenizer(),
+                 stopwords=nltk.corpus.stopwords.words('english'),
+                 **document_kwargs):
         """Creates a new `.Corpus` for the given path, using the given
         `bacalhau.document.base.Document` class to process the files.
 
@@ -29,19 +32,21 @@ class Corpus(object):
         self._document_class = document_class
         self._tokenizer = tokenizer
         self._stopwords = stopwords
-        self._documents = self._get_documents(os.path.abspath(corpus_path))
+        self._documents = self._get_documents(os.path.abspath(corpus_path),
+                                              document_kwargs)
         # Total number of texts (not documents) in the corpus.
         self._text_count = self._get_text_count()
         self._hypernyms = None
         self._tree = None
 
-    def _get_documents(self, corpus_path):
-        """Creates a `Document` object for each of the files in the corpus, and
-        returns them in a `list`.
+    def _get_documents(self, corpus_path, document_kwargs):
+        """Creates a `bacalhau.document.base.Document` object for each
+        of the files in the corpus, and returns them in a `list`.
 
         :param corpus_path: path to the corpus files.
         :type corpus_path: `str`
-        :returns: `list` of `bacalhau.document.base.Document`\'s.
+        :returns: documents in this corpus.
+        :rtype: `list`
         """
         documents = []
 
@@ -49,7 +54,7 @@ class Corpus(object):
             for filename in files:
                 document = self._document_class(
                         os.path.join(path, filename), self._tokenizer,
-                        self._stopwords, *self._document_args)
+                        self._stopwords, **document_kwargs)
                 documents.append(document)
 
         return documents
@@ -67,14 +72,16 @@ class Corpus(object):
 
         return float(count)
 
-    def generate_topic_tree(self, n_terms=10):
-        """Generates a `TopicTree` for the corpus, using a maximum of `n_terms`
-        from each `Text`. First extracts top terms; second gets hypernyms for
-        each of the terms; third creates the `TopicTree` using the hypernyms.
+    def generate_topic_tree(self, n_terms):
+        """Generates a `bacalhau.topic_tree.TopicTree` for the corpus,
+        using a maximum of `n_terms` from each
+        `bacalhau.text.Text`. First extracts top terms; second gets
+        hypernyms for each of the terms; third creates the
+        `bacalhau.topic_tree.TopicTree` using the hypernyms.
 
         :param n_terms: maximum number of terms to be used from each `Text`.
         :type n_terms: `int`
-        :returns: the generated topic tree
+        :returns: the generated topic tree.
         :rtype: `bacalhau.topic_tree.TopicTree`
         """
         top_terms = self.get_top_terms(n_terms)
@@ -92,7 +99,7 @@ class Corpus(object):
 
         :param n_terms: maximum number of terms to be used from each text.
         :type n_terms: `int`
-        :returns: dict.
+        :returns: `dict`
         """
         term_data = self._add_tf_idf(self._get_term_data())
         top_terms = defaultdict(list)
@@ -154,7 +161,8 @@ class Corpus(object):
 
         :param top_terms: dict with term/text information.
         :type top_terms: `dict`
-        :returns: dict -- {text: {term: hypernym}}.
+        :returns: {text: {term: hypernym}}.
+        :rtype: `dict`
         """
         hypernyms = defaultdict(dict)
         cache = {}
@@ -210,8 +218,8 @@ class Corpus(object):
 
     def annotate_topic_tree(self):
         """Annotates the nodes in the `bacalhau.topic_tree.TopicTree`
-        with information about which `Text` and counts the nodes
-        relate to.
+        with information about which `bacalhau.text.Text` and counts
+        the nodes relate to.
 
         :rtype: `bacalhau.topic_tree.TopicTree`
         """

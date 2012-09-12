@@ -3,8 +3,7 @@
 import argparse
 import importlib
 
-from bacalhau.corpus.tei import TEICorpus
-from bacalhau.document.tei import TEIDocument
+from bacalhau.corpus import Corpus
 
 
 def main():
@@ -19,12 +18,16 @@ def main():
                         default='bacalhau.document.tei.TEIDocument',
                         help=document_class_help)
     number_help = 'number of terms to be used from each text'
-    parser.add_argument('-n', '--number', help=number_help, type=int)
+    parser.add_argument('-n', '--number', default=10, help=number_help,
+                        type=int)
     xpath_help = 'XPath expression to extract individual texts from XML corpus files'
     parser.add_argument('-x', '--xpath', help=xpath_help)
     args = parser.parse_args()
     document_class = get_document_class(args.document_class)
-    corpus = TEICorpus(args.corpus_path, document_class, args.xpath)
+    kwargs = {}
+    if args.xpath:
+        kwargs['xpath'] = args.xpath
+    corpus = Corpus(args.corpus_path, document_class, **kwargs)
     tree = corpus.generate_topic_tree(n_terms=args.number)
     tree.render(args.output_file)
 
