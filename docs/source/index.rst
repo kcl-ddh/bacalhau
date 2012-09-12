@@ -3,8 +3,8 @@
 .. Bacalhau documentation master file, created by
    sphinx-quickstart on Tue Sep 11 11:53:12 2012.
 
-Welcome to Bacalhau's documentation!
-====================================
+Bacalhau documentation
+======================
 
 Bacalhau is a python API and a tool to automatically generate topic
 hierarchies, from a corpus of texts, using WordNet.
@@ -29,6 +29,7 @@ Contents
   :maxdepth: 2
 
   installation
+  usage
   api
 
 Indices and tables
