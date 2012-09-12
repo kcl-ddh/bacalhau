@@ -6,7 +6,7 @@
 Bacalhau documentation
 ======================
 
-Bacalhau is a python API and a tool to automatically generate topic
+Bacalhau is a Python library and a tool to automatically generate topic
 hierarchies, from a corpus of texts, using WordNet.
 
 Requirements
