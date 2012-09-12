@@ -19,6 +19,28 @@ import sys, os
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(1, os.path.abspath('../../'))
 
+
+class Mock(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return Mock()
+
+    @classmethod
+    def __getattr__(cls, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        elif name[0] == name[0].upper():
+            return type(name, (), {})
+        else:
+            return Mock()
+
+MOCK_MODULES = ['numpy', 'pyyaml', 'nltk', 'nltk', 'networkx', 'lxml',
+        'pyggraphviz']
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = Mock()
+
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -27,10 +49,10 @@ sys.path.insert(1, os.path.abspath('../../'))
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest',
-    'sphinx.ext.coverage', 'sphinx.ext.viewcode']
+        'sphinx.ext.coverage', 'sphinx.ext.viewcode']
 
 autodoc_default_flags = ['members', 'inherited-member',
-    'private-members', 'undoc-members', 'show-inheritance']
+        'private-members', 'undoc-members', 'show-inheritance']
 autoclass_content = 'both'
 
 # Add any paths that contain templates here, relative to this directory.
@@ -176,22 +198,22 @@ htmlhelp_basename = 'Bacalhaudoc'
 # -- Options for LaTeX output --------------------------------------------------
 
 latex_elements = {
-# The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
+        # The paper size ('letterpaper' or 'a4paper').
+        #'papersize': 'letterpaper',
 
-# The font size ('10pt', '11pt' or '12pt').
-#'pointsize': '10pt',
+        # The font size ('10pt', '11pt' or '12pt').
+        #'pointsize': '10pt',
 
-# Additional stuff for the LaTeX preamble.
-#'preamble': '',
-}
+        # Additional stuff for the LaTeX preamble.
+        #'preamble': '',
+        }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Bacalhau.tex', u'Bacalhau Documentation',
-   u'Miguel Vieira', 'manual'),
-]
+        ('index', 'Bacalhau.tex', u'Bacalhau Documentation',
+            u'Miguel Vieira', 'manual'),
+        ]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -219,9 +241,9 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'bacalhau', u'Bacalhau Documentation',
-     [u'Miguel Vieira'], 1)
-]
+        ('index', 'bacalhau', u'Bacalhau Documentation',
+            [u'Miguel Vieira'], 1)
+        ]
 
 # If true, show URL addresses after external links.
 #man_show_urls = False
@@ -233,10 +255,10 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Bacalhau', u'Bacalhau Documentation',
-   u'Miguel Vieira', 'Bacalhau', 'One line description of project.',
-   'Miscellaneous'),
-]
+        ('index', 'Bacalhau', u'Bacalhau Documentation',
+            u'Miguel Vieira', 'Bacalhau', 'One line description of project.',
+            'Miscellaneous'),
+        ]
 
 # Documents to append as an appendix to all manuals.
 #texinfo_appendices = []
