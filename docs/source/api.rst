@@ -1,7 +1,7 @@
 .. _api:
 
-API
-===
+Library Reference
+=================
 
 Classes
 -------
