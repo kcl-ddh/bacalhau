@@ -60,9 +60,9 @@ class TopicTree(nx.DiGraph):
                     for child in children:
                         self.add_edge(ancestor, child)
 
-                    self._eliminate_parents(node)
+                    self._eliminate_parents(node, min_children)
                 else:
-                    self._eliminate_parents(p)
+                    self._eliminate_parents(p, min_children)
 
     def _eliminate_child_with_parent_name(self, node):
         """Eliminate a child node whose name appears within the parent's
