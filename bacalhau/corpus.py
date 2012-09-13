@@ -11,35 +11,37 @@ class Corpus(object):
     """A manager class to generate topic hierarchies from files."""
 
     def __init__(self, corpus_path, document_class,
-                 tokenizer=nltk.tokenize.regexp.WordPunctTokenizer(),
-                 stopwords=nltk.corpus.stopwords.words('english'),
-                 **document_kwargs):
+            tokenizer=nltk.tokenize.regexp.WordPunctTokenizer(),
+            stopwords=nltk.corpus.stopwords.words('english'),
+            **document_kwargs):
         """Creates a new `.Corpus` for the given path, using the given
         `bacalhau.document.Document` class to process the files.
 
         :param corpus_path: path to the files.
         :type corpus_path: `str`
-        :param document_class: document class used to process the corpus files.
+        :param document_class: document class used to process the
+            corpus files.
         :type document_class: `bacalhau.document.Document`
-        :param tokenizer: tokenizer used to tokenize the files in the corpus,
-            defaults to `nltk.tokenize.regexp.WordPunctTokenizer`.
+        :param tokenizer: tokenizer used to tokenize the files in the
+            corpus, defaults to
+            `nltk.tokenize.regexp.WordPunctTokenizer`.
         :type tokenizer: `nltk.tokenize.api.TokenizerI`
-        :param stopwords: words to be removed from the texts, defaults to
-            `nltk.corpus.stopwords.words(\'english\')`.
+        :param stopwords: words to be removed from the texts, defaults
+            to `nltk.corpus.stopwords.words(\'english\')`.
         :type stopwords: `list`
         """
         self._corpus_path = os.path.abspath(corpus_path)
         self._document_class = document_class
         self._tokenizer = tokenizer
         self._stopwords = stopwords
-        self._documents = self._get_documents(os.path.abspath(corpus_path),
-                                              document_kwargs)
+        self._document_kwargs = document_kwargs
+        self._documents = self._get_documents()
         # Total number of texts (not documents) in the corpus.
         self._text_count = self._get_text_count()
         self._hypernyms = None
         self._tree = None
 
-    def _get_documents(self, corpus_path, document_kwargs):
+    def _get_documents(self):
         """Creates a `bacalhau.document.Document` object for each
         of the files in the corpus, and returns them in a `list`.
 
@@ -50,11 +52,11 @@ class Corpus(object):
         """
         documents = []
 
-        for (path, dirs, files) in os.walk(corpus_path):
+        for (path, dirs, files) in os.walk(self._corpus_path):
             for filename in files:
                 document = self._document_class(
                         os.path.join(path, filename), self._tokenizer,
-                        self._stopwords, **document_kwargs)
+                        self._stopwords, **self._document_kwargs)
                 documents.append(document)
 
         return documents
@@ -79,7 +81,8 @@ class Corpus(object):
         hypernyms for each of the terms; third creates the
         `bacalhau.topic_tree.TopicTree` using the hypernyms.
 
-        :param n_terms: maximum number of terms to be used from each `Text`.
+        :param n_terms: maximum number of terms to be used from each
+            `Text`.
         :type n_terms: `int`
         :returns: the generated topic tree.
         :rtype: `bacalhau.topic_tree.TopicTree`
@@ -97,7 +100,8 @@ class Corpus(object):
         """Returns a dictionary with the highest `n_terms` for each
         `bacalhau.text.Text` from the term data dictionary.
 
-        :param n_terms: maximum number of terms to be used from each text.
+        :param n_terms: maximum number of terms to be used from each
+            text.
         :type n_terms: `int`
         :returns: `dict`
         """
