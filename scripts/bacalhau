@@ -15,7 +15,7 @@ def main():
     parser.add_argument('output_file', help=output_help)
     document_class_help = 'Python class to use for handling corpus files'
     parser.add_argument('document_class', nargs='?',
-                        default='bacalhau.document.tei.TEIDocument',
+                        default='bacalhau.tei_document.TEIDocument',
                         help=document_class_help)
     number_help = 'number of terms to be used from each text'
     parser.add_argument('-n', '--number', default=10, help=number_help,
