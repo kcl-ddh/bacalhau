@@ -8,7 +8,7 @@ Classes
 
 .. toctree::
   corpus
-  documentbase
-  documenttei
+  document
+  tei_document
   text
   topictree

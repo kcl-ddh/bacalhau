@@ -1,4 +1,4 @@
-from bacalhau.document.base import Document
+from bacalhau.document import Document
 from bacalhau.text import Text
 from collections import defaultdict
 from lxml import etree
@@ -6,7 +6,7 @@ from lxml import etree
 
 class TEIDocument (Document):
     """Implementation of the abstract
-    `bacalhau.document.base.Document` class to work with TEI files."""
+    `bacalhau.document.Document` class to work with TEI files."""
 
     TEI_NAMESPACE = 'http://www.tei-c.org/ns/1.0'
     TEI = '{%s}' % TEI_NAMESPACE
@@ -24,9 +24,9 @@ class TEIDocument (Document):
         :type tokenizer: `nltk.tokenize.api.TokenizerI`
         :param stopwords: words to be removed from the texts.
         :type stopwords: `list`
-        :param xpath: XPath where to get the `Text` from the TEI files.
+        :param xpath: XPath where to get the `bacalhau.text.Text` from the TEI files.
         :type xpath: `str`
-        :param ns_map: namespaces used in the `Document`.
+        :param ns_map: namespaces used in the `.TEIDocument`.
         :type ns_map: `dict`
         """
         self._xpath = xpath

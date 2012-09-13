@@ -15,12 +15,12 @@ class Corpus(object):
                  stopwords=nltk.corpus.stopwords.words('english'),
                  **document_kwargs):
         """Creates a new `.Corpus` for the given path, using the given
-        `bacalhau.document.base.Document` class to process the files.
+        `bacalhau.document.Document` class to process the files.
 
         :param corpus_path: path to the files.
         :type corpus_path: `str`
         :param document_class: document class used to process the corpus files.
-        :type document_class: `bacalhau.document.base.Document`
+        :type document_class: `bacalhau.document.Document`
         :param tokenizer: tokenizer used to tokenize the files in the corpus,
             defaults to `nltk.tokenize.regexp.WordPunctTokenizer`.
         :type tokenizer: `nltk.tokenize.api.TokenizerI`
@@ -40,7 +40,7 @@ class Corpus(object):
         self._tree = None
 
     def _get_documents(self, corpus_path, document_kwargs):
-        """Creates a `bacalhau.document.base.Document` object for each
+        """Creates a `bacalhau.document.Document` object for each
         of the files in the corpus, and returns them in a `list`.
 
         :param corpus_path: path to the corpus files.
@@ -127,7 +127,7 @@ class Corpus(object):
 
     def _get_term_data(self):
         """Returns term data for all of the
-        `bacalhau.document.base.Document` objects in this corpus.
+        `bacalhau.document.Document` objects in this corpus.
 
         :rtype: `dict`
         """
