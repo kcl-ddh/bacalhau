@@ -20,6 +20,8 @@ def main():
     number_help = 'number of terms to be used from each text'
     parser.add_argument('-n', '--number', default=10, help=number_help,
                         type=int)
+    raw_help = 'do not compress the topic tree'
+    parser.add_argument('-r', '--raw', action='store_true', help=raw_help)
     xpath_help = 'XPath expression to extract individual texts from XML corpus files'
     parser.add_argument('-x', '--xpath', help=xpath_help)
     args = parser.parse_args()
@@ -29,6 +31,8 @@ def main():
         kwargs['xpath'] = args.xpath
     corpus = Corpus(args.corpus_path, document_class, **kwargs)
     tree = corpus.generate_topic_tree(n_terms=args.number)
+    if not args.raw:
+        tree.compress()
     tree.render(args.output_file)
 
 def get_document_class (document_class_name):
