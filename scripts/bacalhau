@@ -2,6 +2,7 @@
 
 import argparse
 import importlib
+import sys
 
 from bacalhau.corpus import Corpus
 
@@ -12,9 +13,10 @@ def main():
     corpus_path_help = 'path to the directory containing the corpus files'
     parser.add_argument('corpus_path', help=corpus_path_help)
     output_help = 'file to output to'
-    parser.add_argument('output_file', help=output_help)
+    parser.add_argument('output', default=sys.stdout, help=output_help,
+                        nargs='?', type=argparse.FileType('w'))
     document_class_help = 'Python class to use for handling corpus files'
-    parser.add_argument('document_class', nargs='?',
+    parser.add_argument('-d', '--document',
                         default='bacalhau.tei_document.TEIDocument',
                         help=document_class_help)
     number_help = 'number of terms to be used from each text'
@@ -25,7 +27,7 @@ def main():
     xpath_help = 'XPath expression to extract individual texts from XML corpus files'
     parser.add_argument('-x', '--xpath', help=xpath_help)
     args = parser.parse_args()
-    document_class = get_document_class(args.document_class)
+    document_class = get_document_class(args.document)
     kwargs = {}
     if args.xpath:
         kwargs['xpath'] = args.xpath
@@ -33,7 +35,7 @@ def main():
     tree = corpus.generate_topic_tree(n_terms=args.number)
     if not args.raw:
         tree.compress()
-    tree.render(args.output_file)
+    tree.render(args.output)
 
 def get_document_class (document_class_name):
     # QAZ: Really?
