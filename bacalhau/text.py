@@ -3,7 +3,7 @@ import re
 
 
 class Text(object):
-    """Represents a text unit from a `bacalhau.document.base.Document`."""
+    """Represents a text unit from a `bacalhau.document.Document`."""
 
     def __init__(self, text_id, content, tokenizer, stopwords):
         """Creates a new `.Text` object.
