@@ -20,18 +20,21 @@ class TEIDocument (Document):
 
         :param filepath: path to the file.
         :type filepath: `str`
-        :param tokenizer: tokenizer used to tokenize the files in the corpus.
+        :param tokenizer: tokenizer used to tokenize the files in the
+            corpus.
         :type tokenizer: `nltk.tokenize.api.TokenizerI`
         :param stopwords: words to be removed from the texts.
         :type stopwords: `list`
-        :param xpath: XPath where to get the `bacalhau.text.Text` from the TEI files.
+        :param xpath: XPath where to get the `bacalhau.text.Text` from
+            the TEI files.
         :type xpath: `str`
         :param ns_map: namespaces used in the `.TEIDocument`.
         :type ns_map: `dict`
         """
         self._xpath = xpath
         self._ns_map = ns_map
-        super(TEIDocument, self).__init__(filepath, tokenizer, stopwords)
+        super(TEIDocument, self).__init__(filepath, tokenizer,
+                stopwords)
 
     def get_texts(self):
         """Returns a list of `bacalhau.text.Text` objects within this
@@ -42,7 +45,8 @@ class TEIDocument (Document):
         """
         texts = []
         tree = etree.parse(self._path)
-        text_elements = tree.xpath(self._xpath, namespaces=self._ns_map)
+        text_elements = tree.xpath(self._xpath,
+                namespaces=self._ns_map)
         for text_element in text_elements:
             xml_id = text_element.get(self.XML + 'id')
             text_id = '%s-%s' % (self._document_id, xml_id)
