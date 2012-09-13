@@ -56,7 +56,9 @@ class Text(object):
         return term_data
 
     def _is_valid_token(self, token):
-        """Checks if the `token` is suitable for processing.
+        """Checks if the `token` is suitable for processing. A token is
+        suitable if: it is not in the list of stopwords; it is composed of
+        alphabetical character; and is a considered a noun by WordNet.
 
         :param token: the token to validate.
         :type token: `str`
