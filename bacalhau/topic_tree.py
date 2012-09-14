@@ -98,7 +98,9 @@ class TopicTree(nx.DiGraph):
                 self.remove_node(node)
 
     def render(self, filepath, format='svg', prog='dot', attributes={}):
-        """Renders the tree into the file at `filepath`."""
+        """Renders the tree into the file at `filepath`.
+
+        `filepath` may also be a File-like object."""
         agraph = nx.to_agraph(self)
 
         for key, value in attributes.iteritems():
@@ -107,7 +109,14 @@ class TopicTree(nx.DiGraph):
         agraph.draw(filepath, format=format, prog=prog)
 
     def to_json(self, filepath):
-        """Serializes the TopicTree to JSON Graph format."""
-        json_file = open(filepath, 'w')
+        """Serializes the TopicTree to JSON Graph format and writes it
+        to a file.
+
+        `filepath` is a file path or File-like object."""
+        if isinstance(filepath, basestring):
+            json_file = open(filepath, 'w')
+        else:
+            json_file = filepath
         json_file.write(json_graph.dumps(self))
-        json_file.close()
+        if isinstance(filepath, basestring):
+            json_file.close()

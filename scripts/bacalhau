@@ -8,17 +8,19 @@ from bacalhau.corpus import Corpus
 
 
 def main():
-    description = 'Generate a topic hierarchy for a corpus.'
+    description = 'Generate a topic hierarchy for a corpus. By default outputs an SVG representation of the tree.'
     parser = argparse.ArgumentParser(description=description)
     corpus_path_help = 'path to the directory containing the corpus files'
     parser.add_argument('corpus_path', help=corpus_path_help)
     output_help = 'file to output to'
-    parser.add_argument('output', default=sys.stdout, help=output_help,
-                        nargs='?', type=argparse.FileType('w'))
+    parser.add_argument('-o', '--output', default=sys.stdout, help=output_help,
+                        type=argparse.FileType('w'))
     document_class_help = 'Python class to use for handling corpus files'
     parser.add_argument('-d', '--document',
                         default='bacalhau.tei_document.TEIDocument',
                         help=document_class_help)
+    json_help = 'output the topic tree serialised as JSON'
+    parser.add_argument('-j', '--json', action='store_true', help=json_help)
     number_help = 'number of terms to be used from each text'
     parser.add_argument('-n', '--number', default=10, help=number_help,
                         type=int)
@@ -35,7 +37,10 @@ def main():
     tree = corpus.generate_topic_tree(n_terms=args.number)
     if not args.raw:
         tree.compress()
-    tree.render(args.output)
+    if args.json:
+        tree.to_json(args.output)
+    else:
+        tree.render(args.output)
 
 def get_document_class (document_class_name):
     # QAZ: Really?
