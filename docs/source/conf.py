@@ -36,7 +36,7 @@ class Mock(object):
         else:
             return Mock()
 
-MOCK_MODULES = ['lxml', 'nltk', 'nltk.corpus', 'pyggraphviz']
+MOCK_MODULES = ['lxml', 'nltk', 'nltk.corpus', 'nltk.stem', 'pyggraphviz']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
 
