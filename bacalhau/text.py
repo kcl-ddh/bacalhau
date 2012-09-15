@@ -1,4 +1,5 @@
 from nltk.corpus import wordnet
+from nltk.stem import WordNetLemmatizer
 import re
 
 
@@ -21,6 +22,7 @@ class Text(object):
         self._content = content.lower()
         self._tokenizer = tokenizer
         self._stopwords = stopwords
+        self._lemmatizer = WordNetLemmatizer()
 
     def get_term_data(self):
         """Returns term data for this text.
@@ -43,11 +45,12 @@ class Text(object):
         # that the length of the text is not accounted for.
         for token in tokens:
             if self._is_valid_token(token):
-                token_data = term_data.setdefault(token,
+                lemma = self._lemmatizer.lemmatize(token)
+                token_data = term_data.setdefault(lemma,
                         {self._text_id: {'count': 0}})
                 if (token_data[self._text_id]['count'] + 1) > max_token_count:
                     max_token_count += 1
-                term_data[token][self._text_id]['count'] += 1
+                term_data[lemma][self._text_id]['count'] += 1
         # Normalise the term counts to provide a "term frequency" for
         # each term.
         for term, text_data in term_data.items():

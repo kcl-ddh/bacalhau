@@ -8,7 +8,7 @@ class TestText(unittest.TestCase):
     def setUp(self):
         self.text_id = 'id'
         self.text = Text(self.text_id,
-                'The quick brown fox jumps over the lazy dog, dog.',
+                'The quick brown fox jumps over the lazy dog, dogs.',
                 nltk.tokenize.regexp.WordPunctTokenizer(),
                 nltk.corpus.stopwords.words('english'))
 
@@ -23,6 +23,7 @@ class TestText(unittest.TestCase):
 
     def test__is_valid_token(self):
         self.assertTrue(self.text._is_valid_token('dog'))
+        self.assertTrue(self.text._is_valid_token('dogs'))
         self.assertTrue(self.text._is_valid_token('fox'))
         self.assertTrue(self.text._is_valid_token('brown'))
         self.assertFalse(self.text._is_valid_token('the'))
