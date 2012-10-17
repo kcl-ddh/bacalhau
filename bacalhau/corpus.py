@@ -39,7 +39,6 @@ class Corpus(object):
         # Total number of texts (not documents) in the corpus.
         self._text_count = self._get_text_count()
         self._hypernyms = None
-        self._tree = None
 
     def _get_documents(self):
         """Creates a `bacalhau.document.Document` object for each
@@ -90,10 +89,7 @@ class Corpus(object):
         top_terms = self.get_top_terms(n_terms)
         hypernyms = self.get_hypernyms(top_terms)
         tree = self.get_topic_tree(hypernyms)
-
         self._hypernyms = hypernyms
-        self._tree = tree
-
         return tree
 
     def get_top_terms(self, n_terms):
@@ -220,15 +216,16 @@ class Corpus(object):
 
         return tree
 
-    def annotate_topic_tree(self):
+    def annotate_topic_tree(self, tree):
         """Annotates the nodes in the `bacalhau.topic_tree.TopicTree`
         with information about which `bacalhau.text.Text` and counts
         the nodes relate to.
 
+        :param tree: topic tree of terms
+        :type tree: `bacalhau.topic_tree.TopicTree`
         :rtype: `bacalhau.topic_tree.TopicTree`
         """
         hypernyms = self._hypernyms
-        tree = self._tree
 
         for text, data in hypernyms.iteritems():
             for hypernym in data.values():

@@ -62,7 +62,7 @@ class TestCorpus(unittest.TestCase):
 
     def test_annotate_topic_tree(self):
         tree = self.corpus.generate_topic_tree(n_terms=10)
-        tree = self.corpus.annotate_topic_tree()
+        tree = self.corpus.annotate_topic_tree(tree)
         self.assertIsNotNone(tree)
         self.assertGreater(tree.number_of_nodes, 0)
         self.assertTrue('texts' in tree.node[tree.nodes()[0]])
